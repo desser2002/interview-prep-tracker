@@ -23,7 +23,7 @@ function getReviewItems(topics) {
   return items.sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]);
 }
 
-export default function ReviewPanel({ topics }) {
+export default function ReviewPanel({ topics, sidebarWidth = 0 }) {
   const items = getReviewItems(topics);
 
   if (items.length === 0) return null;
@@ -34,7 +34,8 @@ export default function ReviewPanel({ topics }) {
       style={{
         position: 'fixed',
         top: 104,
-        left: 'calc(50% + 384px + 20px)',
+        left: `calc(50% + ${sidebarWidth / 2}px + 384px + 20px)`,
+        transition: 'left 250ms ease',
         width: 272,
         maxHeight: 'calc(100vh - 116px)',
         background: '#fff',

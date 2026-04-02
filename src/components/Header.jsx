@@ -1,13 +1,7 @@
-import { RotateCcw, BookOpenCheck, Download } from 'lucide-react';
+import { BookOpenCheck, Download } from 'lucide-react';
 
-export default function Header({ topics, onReset, onExport }) {
+export default function Header({ name, topics, onExport }) {
   const totalQuestions = topics.reduce((sum, t) => sum + t.questions.length, 0);
-
-  const handleReset = () => {
-    if (window.confirm('Сбросить все данные и вернуться к импорту?')) {
-      onReset();
-    }
-  };
 
   return (
     <header
@@ -27,7 +21,7 @@ export default function Header({ topics, onReset, onExport }) {
           </div>
           <div>
             <h1 className="text-base font-semibold text-[#1d1d1f] leading-tight">
-              Interview Prep Tracker
+              {name ?? 'Interview Prep Tracker'}
             </h1>
             <p className="text-xs text-[#6e6e73]">
               {topics.length} {pluralizeTopic(topics.length)} · {totalQuestions} {pluralizeQ(totalQuestions)}
@@ -49,21 +43,6 @@ export default function Header({ topics, onReset, onExport }) {
           >
             <Download className="w-3.5 h-3.5" />
             Экспорт
-          </button>
-
-          <button
-            onClick={handleReset}
-            className="
-              flex items-center gap-2 px-4 py-2 rounded-full
-              text-sm font-medium text-[#6e6e73]
-              hover:text-[#1d1d1f] hover:bg-white
-              transition-all duration-200 ease-in-out
-              focus:outline-none focus:ring-2 focus:ring-[#0071e3] focus:ring-offset-1
-            "
-            style={{ border: '1px solid rgba(0,0,0,0.1)' }}
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            Сбросить
           </button>
         </div>
       </div>

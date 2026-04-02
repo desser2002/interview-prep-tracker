@@ -1,10 +1,34 @@
 import { useRef, useState } from 'react';
 import { Upload, FileJson, AlertCircle } from 'lucide-react';
 
+function normalizeQuestion(q) {
+  if (typeof q === 'string') {
+    return { text: q, status: 'none', changed_at: null, next_review: null };
+  }
+  return {
+    text: q.text ?? '',
+    status: q.status ?? 'none',
+    changed_at: q.changed_at ?? null,
+    next_review: q.next_review ?? null,
+  };
+}
+
+function normalizeData(parsed) {
+  return {
+    ...parsed,
+    topics: parsed.topics.map((topic) => ({
+      ...topic,
+      questions: topic.questions.map(normalizeQuestion),
+    })),
+  };
+}
+
 export default function ImportScreen({ onImport }) {
   const inputRef = useRef(null);
   const [error, setError] = useState(null);
   const [dragging, setDragging] = useState(false);
+  const [parsedData, setParsedData] = useState(null);
+  const [name, setName] = useState('');
 
   const parseFile = (file) => {
     if (!file) return;
@@ -18,7 +42,7 @@ export default function ImportScreen({ onImport }) {
           setError('Неверный формат: ожидается объект с полем "topics" (массив).');
           return;
         }
-        onImport(data);
+        setParsedData(normalizeData(data));
       } catch {
         setError('Не удалось прочитать файл. Убедитесь, что это валидный JSON.');
       }
@@ -34,13 +58,78 @@ export default function ImportScreen({ onImport }) {
     parseFile(e.dataTransfer.files[0]);
   };
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setDragging(true);
+  const handleConfirm = () => {
+    const trimmed = name.trim();
+    if (!trimmed || !parsedData) return;
+    onImport(parsedData, trimmed);
   };
 
-  const handleDragLeave = () => setDragging(false);
+  // Step 2: name input after successful parse
+  if (parsedData) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4">
+        <div className="mb-10 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#0071e3] mb-6 shadow-lg">
+            <FileJson className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-4xl font-semibold text-[#1d1d1f] tracking-tight mb-2">
+            Чеклист импортирован
+          </h1>
+          <p className="text-[#6e6e73] text-lg font-normal">
+            {parsedData.topics.length} тем ·{' '}
+            {parsedData.topics.reduce((s, t) => s + t.questions.length, 0)} вопросов
+          </p>
+        </div>
 
+        <div className="w-full max-w-md">
+          <label className="block text-sm font-medium text-[#1d1d1f] mb-2">
+            Название чеклиста
+          </label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
+            placeholder="Например: Java Backend"
+            autoFocus
+            className="w-full px-5 py-3.5 rounded-2xl text-base text-[#1d1d1f] placeholder-[#c7c7cc] outline-none"
+            style={{
+              border: '1px solid rgba(0,0,0,0.12)',
+              background: '#fff',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+            }}
+          />
+
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={() => setParsedData(null)}
+              className="
+                flex-1 py-3 rounded-full text-base font-medium text-[#6e6e73]
+                hover:text-[#1d1d1f] hover:bg-white transition-all duration-200
+              "
+              style={{ border: '1px solid rgba(0,0,0,0.1)' }}
+            >
+              Назад
+            </button>
+            <button
+              onClick={handleConfirm}
+              disabled={!name.trim()}
+              className="
+                flex-1 py-3 rounded-full bg-[#0071e3] hover:bg-[#0077ed]
+                text-white font-medium text-base
+                transition-all duration-200 shadow-sm
+                disabled:opacity-40 disabled:cursor-default
+              "
+            >
+              Начать
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Step 1: file picker
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
       {/* Logo / Title */}
@@ -59,8 +148,8 @@ export default function ImportScreen({ onImport }) {
       {/* Drop zone */}
       <div
         onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
+        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
         onClick={() => inputRef.current?.click()}
         className={`
           relative w-full max-w-md cursor-pointer rounded-2xl border-2 border-dashed
