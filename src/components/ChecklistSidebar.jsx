@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Menu, ChevronLeft, Trash2, Plus, FileJson, AlertCircle } from 'lucide-react';
+import { Menu, ChevronLeft, Trash2, Plus, FileJson, AlertCircle, Download } from 'lucide-react';
 
 function normalizeQuestion(q) {
   if (typeof q === 'string') {
@@ -275,6 +275,7 @@ export default function ChecklistSidebar({
   onSelect,
   onDelete,
   onAdd,
+  onExportAll,
 }) {
   const [showModal, setShowModal] = useState(false);
   const [hoveredId, setHoveredId] = useState(null);
@@ -463,7 +464,7 @@ export default function ChecklistSidebar({
           })}
         </div>
 
-        {/* Add button */}
+        {/* Add button + Export All button */}
         <div
           style={{
             padding: '10px 8px',
@@ -472,6 +473,9 @@ export default function ChecklistSidebar({
             opacity: isOpen ? 1 : 0,
             transition: 'opacity 150ms ease',
             pointerEvents: isOpen ? 'auto' : 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 6,
           }}
         >
           <button
@@ -497,6 +501,37 @@ export default function ChecklistSidebar({
           >
             <Plus style={{ width: 14, height: 14 }} />
             Добавить чеклист
+          </button>
+          <button
+            onClick={onExportAll}
+            disabled={checklists.length === 0}
+            title="Экспортировать все чеклисты в один файл"
+            style={{
+              width: '100%',
+              padding: '9px 12px',
+              borderRadius: 10,
+              border: 'none',
+              background: 'rgba(0,0,0,0.05)',
+              color: '#6e6e73',
+              fontSize: 13,
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
+              cursor: checklists.length === 0 ? 'default' : 'pointer',
+              opacity: checklists.length === 0 ? 0.4 : 1,
+              transition: 'background 150ms ease, opacity 150ms ease',
+            }}
+            onMouseEnter={(e) => {
+              if (checklists.length > 0) e.currentTarget.style.background = 'rgba(0,0,0,0.1)';
+            }}
+            onMouseLeave={(e) => {
+              if (checklists.length > 0) e.currentTarget.style.background = 'rgba(0,0,0,0.05)';
+            }}
+          >
+            <Download style={{ width: 14, height: 14 }} />
+            Экспортировать все
           </button>
         </div>
       </div>
