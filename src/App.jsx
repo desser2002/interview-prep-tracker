@@ -68,6 +68,17 @@ function exportChecklist(checklist) {
   URL.revokeObjectURL(url);
 }
 
+function exportAllChecklists(checklists) {
+  const data = checklists.map((c) => ({ name: c.name, topics: c.topics }));
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `all-checklists-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function App() {
   const [checklists, setChecklists] = useLocalStorage('checklists', migrateOrEmpty);
   const [activeId, setActiveId] = useLocalStorage('active_checklist_id', null);
@@ -157,6 +168,7 @@ export default function App() {
         onSelect={setActiveId}
         onDelete={handleDeleteChecklist}
         onAdd={handleAddChecklist}
+        onExportAll={() => exportAllChecklists(checklists)}
       />
 
       <div style={{ flex: 1, minWidth: 0 }}>
