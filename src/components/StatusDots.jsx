@@ -1,8 +1,8 @@
 const STATUSES = [
-  { key: 'none', color: '#c7c7cc', activeColor: '#8e8e93' },
-  { key: 'fail', color: '#ff3b30', activeColor: '#ff3b30' },
-  { key: 'partial', color: '#ff9f0a', activeColor: '#ff9f0a' },
-  { key: 'done', color: '#34c759', activeColor: '#34c759' },
+  { key: 'none', color: '#c7c7cc', activeColor: '#8e8e93', label: 'Не отмечено' },
+  { key: 'fail', color: '#ff3b30', activeColor: '#ff3b30', label: 'Провал' },
+  { key: 'partial', color: '#ff9f0a', activeColor: '#ff9f0a', label: 'Частично' },
+  { key: 'done', color: '#34c759', activeColor: '#34c759', label: 'Усвоено' },
 ];
 
 export default function StatusDots({ status, onStatusChange }) {
@@ -14,7 +14,8 @@ export default function StatusDots({ status, onStatusChange }) {
           <button
             key={s.key}
             onClick={() => onStatusChange(s.key)}
-            title={s.key}
+            title={s.label}
+            aria-label={s.label}
             className="focus:outline-none transition-all duration-150 ease-in-out"
             style={{
               width: isActive ? 12 : 8,
