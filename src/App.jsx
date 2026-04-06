@@ -173,7 +173,7 @@ export default function App() {
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <Header name={activeChecklist?.name} topics={topics} onExport={handleExport} />
-        <ReviewPanel topics={topics} sidebarWidth={sidebarWidth} />
+        <ReviewPanel topics={topics} onStatusChange={handleStatusChange} sidebarWidth={sidebarWidth} />
 
         <main className="max-w-3xl mx-auto px-4 py-8 space-y-4">
           <ProgressBanner topics={topics} />
