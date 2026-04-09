@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import QuestionRow from './QuestionRow';
+import { useLanguage } from '../hooks/useLanguage';
 
 export default function TopicCard({ topic, index, onStatusChange }) {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
 
   const count = topic.questions.length;
@@ -35,7 +37,7 @@ export default function TopicCard({ topic, index, onStatusChange }) {
               {topic.name}
             </h2>
             <p className="text-xs text-[#6e6e73] mt-0.5">
-              {pluralize(count, 'вопрос', 'вопроса', 'вопросов')}
+              {t('questionCount', count)}
             </p>
 
             {/* Progress bar */}
@@ -93,12 +95,4 @@ export default function TopicCard({ topic, index, onStatusChange }) {
       </div>
     </div>
   );
-}
-
-function pluralize(n, one, few, many) {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return `${n} ${one}`;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return `${n} ${few}`;
-  return `${n} ${many}`;
 }

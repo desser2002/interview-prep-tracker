@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { Upload, FileJson, AlertCircle } from 'lucide-react';
+import { useLanguage } from '../hooks/useLanguage';
 
 function normalizeQuestion(q) {
   if (typeof q === 'string') {
@@ -24,6 +25,7 @@ function normalizeData(parsed) {
 }
 
 export default function ImportScreen({ onImport }) {
+  const { t } = useLanguage();
   const inputRef = useRef(null);
   const [error, setError] = useState(null);
   const [dragging, setDragging] = useState(false);
@@ -39,12 +41,12 @@ export default function ImportScreen({ onImport }) {
       try {
         const data = JSON.parse(e.target.result);
         if (!data.topics || !Array.isArray(data.topics)) {
-          setError('Неверный формат: ожидается объект с полем "topics" (массив).');
+          setError(t('errorInvalidFormat'));
           return;
         }
         setParsedData(normalizeData(data));
       } catch {
-        setError('Не удалось прочитать файл. Убедитесь, что это валидный JSON.');
+        setError(t('errorReadFailed'));
       }
     };
     reader.readAsText(file);
@@ -64,6 +66,10 @@ export default function ImportScreen({ onImport }) {
     onImport(parsedData, trimmed);
   };
 
+  const totalQuestions = parsedData
+    ? parsedData.topics.reduce((sum, topic) => sum + topic.questions.length, 0)
+    : 0;
+
   // Step 2: name input after successful parse
   if (parsedData) {
     return (
@@ -73,24 +79,23 @@ export default function ImportScreen({ onImport }) {
             <FileJson className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl font-semibold text-[#1d1d1f] tracking-tight mb-2">
-            Чеклист импортирован
+            {t('checklistImported')}
           </h1>
           <p className="text-[#6e6e73] text-lg font-normal">
-            {parsedData.topics.length} тем ·{' '}
-            {parsedData.topics.reduce((s, t) => s + t.questions.length, 0)} вопросов
+            {t('topicsCount', parsedData.topics.length)} · {t('questionsCount', totalQuestions)}
           </p>
         </div>
 
         <div className="w-full max-w-md">
           <label className="block text-sm font-medium text-[#1d1d1f] mb-2">
-            Название чеклиста
+            {t('checklistName')}
           </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
-            placeholder="Например: Java Backend"
+            placeholder={t('namePlaceholder')}
             autoFocus
             className="w-full px-5 py-3.5 rounded-2xl text-base text-[#1d1d1f] placeholder-[#c7c7cc] outline-none"
             style={{
@@ -109,7 +114,7 @@ export default function ImportScreen({ onImport }) {
               "
               style={{ border: '1px solid rgba(0,0,0,0.1)' }}
             >
-              Назад
+              {t('back')}
             </button>
             <button
               onClick={handleConfirm}
@@ -121,7 +126,7 @@ export default function ImportScreen({ onImport }) {
                 disabled:opacity-40 disabled:cursor-default
               "
             >
-              Начать
+              {t('start')}
             </button>
           </div>
         </div>
@@ -141,7 +146,7 @@ export default function ImportScreen({ onImport }) {
           Interview Prep Tracker
         </h1>
         <p className="text-[#6e6e73] text-lg font-normal">
-          Импортируйте список тем и начните подготовку
+          {t('appSubtitle')}
         </p>
       </div>
 
@@ -171,10 +176,10 @@ export default function ImportScreen({ onImport }) {
 
         <div className="text-center">
           <p className="text-[#1d1d1f] font-medium text-base mb-1">
-            {dragging ? 'Отпустите файл' : 'Перетащите JSON-файл'}
+            {dragging ? t('dropRelease') : t('dropInstruction')}
           </p>
           <p className="text-[#6e6e73] text-sm">
-            или нажмите чтобы выбрать
+            {t('dropClickHint')}
           </p>
         </div>
 
@@ -199,7 +204,7 @@ export default function ImportScreen({ onImport }) {
           focus:outline-none focus:ring-2 focus:ring-[#0071e3] focus:ring-offset-2
         "
       >
-        Импортировать JSON
+        {t('importJson')}
       </button>
 
       {/* Error */}
@@ -213,7 +218,7 @@ export default function ImportScreen({ onImport }) {
       {/* Format hint */}
       <div className="mt-10 max-w-md w-full">
         <p className="text-xs text-[#6e6e73] text-center mb-3 uppercase tracking-wider font-medium">
-          Ожидаемый формат
+          {t('expectedFormat')}
         </p>
         <pre className="bg-white rounded-2xl px-5 py-4 text-xs text-[#1d1d1f] overflow-x-auto leading-relaxed"
           style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.08)', border: '1px solid rgba(0,0,0,0.06)' }}>
@@ -233,3 +238,4 @@ export default function ImportScreen({ onImport }) {
     </div>
   );
 }
+

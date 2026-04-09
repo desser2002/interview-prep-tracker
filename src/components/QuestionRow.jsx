@@ -1,10 +1,10 @@
 import StatusDots from './StatusDots';
+import { useLanguage } from '../hooks/useLanguage';
 
-function formatDate(isoString) {
+function formatDate(isoString, months) {
   if (!isoString) return null;
   const date = new Date(isoString);
   const now = new Date();
-  const months = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
   const day = date.getDate();
   const month = months[date.getMonth()];
   if (date.getFullYear() === now.getFullYear()) {
@@ -15,7 +15,10 @@ function formatDate(isoString) {
 
 
 export default function QuestionRow({ question, index, onStatusChange }) {
-  const reviewLabel = question.status !== 'none' ? formatDate(question.next_review) : null;
+  const { t } = useLanguage();
+  const months = t('months');
+  const formattedDate = question.status !== 'none' ? formatDate(question.next_review, months) : null;
+  const reviewLabel = formattedDate ? t('reviewLabel', formattedDate) : null;
 
   return (
     <li className="flex items-center gap-3 py-1">
@@ -29,7 +32,7 @@ export default function QuestionRow({ question, index, onStatusChange }) {
         {question.text}
         {reviewLabel && (
           <span className="ml-2 text-[11px] text-[#b0b0b5] font-normal whitespace-nowrap">
-            Повторить: {reviewLabel}
+            {reviewLabel}
           </span>
         )}
       </span>

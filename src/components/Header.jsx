@@ -1,7 +1,9 @@
 import { BookOpenCheck, Download } from 'lucide-react';
+import { useLanguage } from '../hooks/useLanguage';
 
 export default function Header({ name, topics, onExport }) {
-  const totalQuestions = topics.reduce((sum, t) => sum + t.questions.length, 0);
+  const { t, lang, setLang } = useLanguage();
+  const totalQuestions = topics.reduce((sum, topic) => sum + topic.questions.length, 0);
 
   return (
     <header
@@ -24,13 +26,28 @@ export default function Header({ name, topics, onExport }) {
               {name ?? 'Interview Prep Tracker'}
             </h1>
             <p className="text-xs text-[#6e6e73]">
-              {topics.length} {pluralizeTopic(topics.length)} · {totalQuestions} {pluralizeQ(totalQuestions)}
+              {t('topicsCount', topics.length)} · {t('questionsCount', totalQuestions)}
             </p>
           </div>
         </div>
 
         {/* Right: actions */}
         <div className="flex items-center gap-2">
+          {/* Language toggle */}
+          <button
+            onClick={() => setLang(t('switchTo'))}
+            className="
+              px-3 py-1.5 rounded-full
+              text-xs font-semibold text-[#6e6e73]
+              hover:bg-white transition-all duration-200 ease-in-out
+              focus:outline-none focus:ring-2 focus:ring-[#0071e3] focus:ring-offset-1
+            "
+            style={{ border: '1px solid rgba(0,0,0,0.15)' }}
+            title={lang === 'ru' ? 'Switch to English' : 'Переключить на русский'}
+          >
+            {t('languageName')}
+          </button>
+
           <button
             onClick={onExport}
             className="
@@ -42,26 +59,10 @@ export default function Header({ name, topics, onExport }) {
             style={{ border: '1px solid rgba(0,113,227,0.25)' }}
           >
             <Download className="w-3.5 h-3.5" />
-            Экспорт
+            {t('export')}
           </button>
         </div>
       </div>
     </header>
   );
-}
-
-function pluralizeTopic(n) {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return 'тема';
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'темы';
-  return 'тем';
-}
-
-function pluralizeQ(n) {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return 'вопрос';
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'вопроса';
-  return 'вопросов';
 }

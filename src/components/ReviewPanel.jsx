@@ -1,4 +1,5 @@
 import StatusDots from './StatusDots';
+import { useLanguage } from '../hooks/useLanguage';
 
 const STATUS_ORDER = { fail: 0, partial: 1, done: 2 };
 
@@ -26,6 +27,7 @@ function getReviewItems(topics) {
 }
 
 export default function ReviewPanel({ topics, onStatusChange, sidebarWidth = 0 }) {
+  const { t } = useLanguage();
   const items = getReviewItems(topics);
 
   if (items.length === 0) return null;
@@ -50,7 +52,7 @@ export default function ReviewPanel({ topics, onStatusChange, sidebarWidth = 0 }
       {/* Header */}
       <div className="px-4 pt-4 pb-3 flex-shrink-0" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
         <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold text-[#1d1d1f]">Повторить сегодня</span>
+          <span className="text-sm font-semibold text-[#1d1d1f]">{t('reviewToday')}</span>
           <span
             className="text-xs font-semibold px-2 py-0.5 rounded-full"
             style={{ background: '#ff3b3015', color: '#ff3b30' }}
