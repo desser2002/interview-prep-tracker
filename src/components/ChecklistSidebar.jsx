@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { Menu, ChevronLeft, Trash2, Plus, FileJson, AlertCircle, Download } from 'lucide-react';
+import { useLanguage } from '../hooks/useLanguage';
 
 function normalizeQuestion(q) {
   if (typeof q === 'string') {
@@ -24,6 +25,7 @@ function normalizeImported(parsed) {
 }
 
 function AddChecklistModal({ onAdd, onClose }) {
+  const { t } = useLanguage();
   const [step, setStep] = useState('import');
   const [parsedData, setParsedData] = useState(null);
   const [name, setName] = useState('');
@@ -39,13 +41,13 @@ function AddChecklistModal({ onAdd, onClose }) {
       try {
         const data = JSON.parse(e.target.result);
         if (!data.topics || !Array.isArray(data.topics)) {
-          setError('Неверный формат: ожидается объект с полем "topics" (массив).');
+          setError(t('errorInvalidFormat'));
           return;
         }
         setParsedData(normalizeImported(data));
         setStep('name');
       } catch {
-        setError('Не удалось прочитать файл. Убедитесь, что это валидный JSON.');
+        setError(t('errorReadFailed'));
       }
     };
     reader.readAsText(file);
@@ -57,6 +59,10 @@ function AddChecklistModal({ onAdd, onClose }) {
     onAdd(parsedData, trimmed);
     onClose();
   };
+
+  const totalQuestions = parsedData
+    ? parsedData.topics.reduce((sum, topic) => sum + topic.questions.length, 0)
+    : 0;
 
   return (
     <div
@@ -87,7 +93,7 @@ function AddChecklistModal({ onAdd, onClose }) {
         {step === 'import' ? (
           <>
             <h2 style={{ fontSize: 17, fontWeight: 600, color: '#1d1d1f', margin: '0 0 16px' }}>
-              Добавить чеклист
+              {t('addChecklist')}
             </h2>
 
             <div
@@ -125,10 +131,10 @@ function AddChecklistModal({ onAdd, onClose }) {
               </div>
               <div style={{ textAlign: 'center' }}>
                 <p style={{ fontSize: 14, fontWeight: 500, color: '#1d1d1f', margin: '0 0 2px' }}>
-                  {dragging ? 'Отпустите файл' : 'Перетащите JSON-файл'}
+                  {dragging ? t('dropRelease') : t('dropInstruction')}
                 </p>
                 <p style={{ fontSize: 12, color: '#6e6e73', margin: 0 }}>
-                  или нажмите чтобы выбрать
+                  {t('dropClickHint')}
                 </p>
               </div>
               <input
@@ -173,7 +179,7 @@ function AddChecklistModal({ onAdd, onClose }) {
                   cursor: 'pointer',
                 }}
               >
-                Отмена
+                {t('cancel')}
               </button>
               <button
                 onClick={() => inputRef.current?.click()}
@@ -189,18 +195,17 @@ function AddChecklistModal({ onAdd, onClose }) {
                   cursor: 'pointer',
                 }}
               >
-                Выбрать файл
+                {t('selectFile')}
               </button>
             </div>
           </>
         ) : (
           <>
             <h2 style={{ fontSize: 17, fontWeight: 600, color: '#1d1d1f', margin: '0 0 4px' }}>
-              Название чеклиста
+              {t('checklistName')}
             </h2>
             <p style={{ fontSize: 13, color: '#6e6e73', margin: '0 0 16px' }}>
-              {parsedData.topics.length} {pluralizeTopic(parsedData.topics.length)} ·{' '}
-              {parsedData.topics.reduce((s, t) => s + t.questions.length, 0)} вопросов
+              {t('topicsCount', parsedData.topics.length)} · {t('questionsCount', totalQuestions)}
             </p>
 
             <input
@@ -208,7 +213,7 @@ function AddChecklistModal({ onAdd, onClose }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
-              placeholder="Например: Java Backend"
+              placeholder={t('namePlaceholder')}
               autoFocus
               style={{
                 width: '100%',
@@ -238,7 +243,7 @@ function AddChecklistModal({ onAdd, onClose }) {
                   cursor: 'pointer',
                 }}
               >
-                Назад
+                {t('back')}
               </button>
               <button
                 onClick={handleConfirm}
@@ -257,7 +262,7 @@ function AddChecklistModal({ onAdd, onClose }) {
                   transition: 'opacity 150ms ease',
                 }}
               >
-                Добавить
+                {t('add')}
               </button>
             </div>
           </>
@@ -277,13 +282,14 @@ export default function ChecklistSidebar({
   onAdd,
   onExportAll,
 }) {
+  const { t } = useLanguage();
   const [showModal, setShowModal] = useState(false);
   const [hoveredId, setHoveredId] = useState(null);
 
   const handleDelete = (e, id) => {
     e.stopPropagation();
     const checklist = checklists.find((c) => c.id === id);
-    if (window.confirm(`Удалить чеклист "${checklist?.name}"?`)) {
+    if (window.confirm(t('deleteConfirm', checklist?.name))) {
       onDelete(id);
     }
   };
@@ -330,12 +336,12 @@ export default function ChecklistSidebar({
                 overflow: 'hidden',
               }}
             >
-              Мои чеклисты
+              {t('myChecklists')}
             </span>
           )}
           <button
             onClick={onToggle}
-            title={isOpen ? 'Свернуть' : 'Развернуть'}
+            title={isOpen ? t('collapse') : t('expand')}
             style={{
               width: 32,
               height: 32,
@@ -422,14 +428,14 @@ export default function ChecklistSidebar({
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {checklist.topics.length} {pluralizeTopic(checklist.topics.length)}
+                    {checklist.topics.length} {t('topicWord', checklist.topics.length)}
                   </p>
                 </div>
 
                 {isHovered && (
                   <button
                     onClick={(e) => handleDelete(e, checklist.id)}
-                    title="Удалить"
+                    title={t('deleteTitle')}
                     style={{
                       width: 24,
                       height: 24,
@@ -500,12 +506,12 @@ export default function ChecklistSidebar({
             onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(0,113,227,0.1)')}
           >
             <Plus style={{ width: 14, height: 14 }} />
-            Добавить чеклист
+            {t('addChecklist')}
           </button>
           <button
             onClick={onExportAll}
             disabled={checklists.length === 0}
-            title="Экспортировать все чеклисты в один файл"
+            title={t('exportAllTitle')}
             style={{
               width: '100%',
               padding: '9px 12px',
@@ -531,7 +537,7 @@ export default function ChecklistSidebar({
             }}
           >
             <Download style={{ width: 14, height: 14 }} />
-            Экспортировать все
+            {t('exportAll')}
           </button>
         </div>
       </div>
@@ -541,12 +547,4 @@ export default function ChecklistSidebar({
       )}
     </>
   );
-}
-
-function pluralizeTopic(n) {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return 'тема';
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'темы';
-  return 'тем';
 }

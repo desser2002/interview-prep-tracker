@@ -1,3 +1,5 @@
+import { useLanguage } from '../hooks/useLanguage';
+
 const STATUS_COLORS = {
   done:    '#34c759',
   partial: '#ff9f0a',
@@ -6,7 +8,8 @@ const STATUS_COLORS = {
 };
 
 export default function ProgressBanner({ topics }) {
-  const allQuestions = topics.flatMap((t) => t.questions);
+  const { t } = useLanguage();
+  const allQuestions = topics.flatMap((topic) => topic.questions);
   const total = allQuestions.length;
   const done    = allQuestions.filter((q) => q.status === 'done').length;
   const partial = allQuestions.filter((q) => q.status === 'partial').length;
@@ -26,7 +29,7 @@ export default function ProgressBanner({ topics }) {
       <div className="flex items-end justify-between mb-4">
         <div>
           <p className="text-xs font-medium text-[#6e6e73] uppercase tracking-wider mb-1">
-            Общий прогресс
+            {t('overallProgress')}
           </p>
           <p className="text-4xl font-bold text-[#1d1d1f] leading-none tracking-tight">
             {percent}
@@ -41,10 +44,10 @@ export default function ProgressBanner({ topics }) {
 
         {/* Stats */}
         <div className="flex items-center gap-5">
-          <Stat value={done}    label="Усвоено"   color="#34c759" />
-          <Stat value={partial} label="Частично"  color="#ff9f0a" />
-          <Stat value={fail}    label="Провал"    color="#ff3b30" />
-          <Stat value={total - done - partial - fail} label="Не начато" color="#c7c7cc" />
+          <Stat value={done}    label={t('mastered')}   color="#34c759" />
+          <Stat value={partial} label={t('partial')}    color="#ff9f0a" />
+          <Stat value={fail}    label={t('failed')}     color="#ff3b30" />
+          <Stat value={total - done - partial - fail} label={t('notStarted')} color="#c7c7cc" />
         </div>
       </div>
 
@@ -66,7 +69,7 @@ export default function ProgressBanner({ topics }) {
 
       {/* Bottom: question count */}
       <p className="text-xs text-[#6e6e73] mt-3">
-        {done} из {total} вопросов усвоено · {topics.length} {pluralizeTopic(topics.length)}
+        {t('progressSummary', done, total, topics.length)}
       </p>
     </div>
   );
@@ -82,12 +85,4 @@ function Stat({ value, label, color }) {
       <p className="text-[10px] text-[#6e6e73]">{label}</p>
     </div>
   );
-}
-
-function pluralizeTopic(n) {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return 'тема';
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'темы';
-  return 'тем';
 }
