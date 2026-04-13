@@ -87,8 +87,8 @@ function parseQuestionsInput(rawInput) {
     return { questions: [], parsedTopicName: null };
   }
 
-  const startsLikeJson = trimmed.startsWith('{') || trimmed.startsWith('[');
-  if (!startsLikeJson) {
+  const looksLikeJson = trimmed.startsWith('{') || trimmed.startsWith('[');
+  if (!looksLikeJson) {
     const questions = trimmed
       .split(/\r?\n/)
       .map((line) => line.trim())
@@ -102,15 +102,15 @@ function parseQuestionsInput(rawInput) {
   } catch {
     throw new Error('INVALID_JSON');
   }
-  const sourceQuestions = Array.isArray(parsed) ? parsed : parsed?.questions;
+  const rawQuestions = Array.isArray(parsed) ? parsed : parsed?.questions;
   const hasNameField = !Array.isArray(parsed) && typeof parsed?.name === 'string';
   const parsedTopicName = hasNameField ? parsed.name.trim() : null;
 
-  if (!Array.isArray(sourceQuestions)) {
+  if (!Array.isArray(rawQuestions)) {
     throw new Error('INVALID_FORMAT');
   }
 
-  const questions = sourceQuestions
+  const questions = rawQuestions
     .map((item) => {
       if (typeof item === 'string') return item.trim();
       if (item && typeof item === 'object' && typeof item.text === 'string') return item.text.trim();
