@@ -39,9 +39,9 @@ export default function ReviewPanel({ topics, onStatusChange, onPostponeReview, 
   const [days, setDays] = useState('1');
   const [isPostponeOpen, setIsPostponeOpen] = useState(false);
   const [selectedStatuses, setSelectedStatuses] = useState({
-    fail: true,
-    partial: true,
-    done: true,
+    fail: false,
+    partial: false,
+    done: false,
   });
 
   if (items.length === 0) return null;
