@@ -401,6 +401,40 @@ export default function App() {
     );
   };
 
+  const handlePostponeReview = (statuses, days) => {
+    if (!activeChecklist || !Array.isArray(statuses) || statuses.length === 0 || days <= 0) return;
+
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    const now = new Date().toISOString();
+
+    setChecklists(
+      checklists.map((c) => {
+        if (c.id !== activeChecklist.id) return c;
+        return {
+          ...c,
+          topics: c.topics.map((topic) => ({
+            ...topic,
+            questions: topic.questions.map((q) => {
+              if (q.status === 'none' || !q.next_review || !statuses.includes(q.status)) return q;
+              const nextReviewDate = new Date(q.next_review);
+              if (nextReviewDate > today) return q;
+
+              const postponedDate = new Date(nextReviewDate);
+              postponedDate.setDate(postponedDate.getDate() + days);
+
+              return {
+                ...q,
+                changed_at: now,
+                next_review: postponedDate.toISOString(),
+              };
+            }),
+          })),
+        };
+      })
+    );
+  };
+
   if (checklists.length === 0) {
     return <ImportScreen onImport={handleAddChecklist} />;
   }
@@ -423,7 +457,12 @@ export default function App() {
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <Header name={activeChecklist?.name} topics={topics} onExport={handleExport} />
-        <ReviewPanel topics={topics} onStatusChange={handleStatusChange} sidebarWidth={sidebarWidth} />
+        <ReviewPanel
+          topics={topics}
+          onStatusChange={handleStatusChange}
+          onPostponeReview={handlePostponeReview}
+          sidebarWidth={sidebarWidth}
+        />
 
         <main className="max-w-3xl mx-auto px-4 py-8 space-y-4">
           <ProgressBanner topics={topics} />

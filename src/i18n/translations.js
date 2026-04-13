@@ -57,6 +57,10 @@ export const translations = {
 
     // Review panel
     reviewToday: 'Повторить сегодня',
+    reviewPostponeForStatuses: 'Для статусов',
+    reviewPostponeByDays: 'дней',
+    reviewPostponeButton: 'Перенести',
+    reviewPostponeApply: 'Применить',
 
     // Question row
     reviewLabel: (date) => `Повторить: ${date}`,
@@ -135,6 +139,10 @@ export const translations = {
 
     // Review panel
     reviewToday: 'Review Today',
+    reviewPostponeForStatuses: 'For statuses',
+    reviewPostponeByDays: 'days',
+    reviewPostponeButton: 'Postpone',
+    reviewPostponeApply: 'Apply',
 
     // Question row
     reviewLabel: (date) => `Review: ${date}`,
