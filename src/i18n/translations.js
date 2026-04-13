@@ -76,7 +76,7 @@ export const translations = {
     addTopicInvalidStructure: 'Неверная JSON-структура: ожидается массив вопросов или объект с полем "questions".',
     addTopicFormatError: 'Неверный формат. Используйте JSON или список вопросов по строкам.',
     addTopicFormatHint:
-      'Формат 1 (JSON): {"name":"OOP","questions":["Что такое полиморфизм?","SOLID принципы"]}\nФормат 2 (списком):\nЧто такое полиморфизм?\nSOLID принципы',
+      'Формат 1 (JSON): {"name":"OOP","questions":["Что такое полиморфизм?","SOLID принципы"]}\nФормат 2 (по строкам):\nЧто такое полиморфизм?\nSOLID принципы',
 
     // Status dots
     statusNone: 'Не отмечено',
