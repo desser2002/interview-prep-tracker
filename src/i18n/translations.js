@@ -72,6 +72,8 @@ export const translations = {
     questionsInputPlaceholder: 'Вставьте JSON или список вопросов (по одному в строке)',
     addTopicNameRequired: 'Укажите название темы или передайте поле "name" в JSON.',
     addTopicQuestionsRequired: 'Добавьте хотя бы один вопрос.',
+    addTopicInvalidJson: 'Невалидный JSON. Проверьте синтаксис.',
+    addTopicInvalidStructure: 'Неверная JSON-структура: ожидается массив вопросов или объект с полем "questions".',
     addTopicFormatError: 'Неверный формат. Используйте JSON или список вопросов по строкам.',
     addTopicFormatHint:
       'Формат 1 (JSON): {"name":"OOP","questions":["Что такое полиморфизм?","SOLID принципы"]}\nФормат 2 (списком):\nЧто такое полиморфизм?\nSOLID принципы',
@@ -148,6 +150,8 @@ export const translations = {
     questionsInputPlaceholder: 'Paste JSON or one question per line',
     addTopicNameRequired: 'Provide a topic name or include the "name" field in JSON.',
     addTopicQuestionsRequired: 'Add at least one question.',
+    addTopicInvalidJson: 'Invalid JSON. Please check syntax.',
+    addTopicInvalidStructure: 'Invalid JSON structure: expected a questions array or an object with a "questions" field.',
     addTopicFormatError: 'Invalid format. Use JSON or one question per line.',
     addTopicFormatHint:
       'Format 1 (JSON): {"name":"OOP","questions":["What is polymorphism?","SOLID principles"]}\nFormat 2 (plain list):\nWhat is polymorphism?\nSOLID principles',

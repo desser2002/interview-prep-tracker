@@ -149,7 +149,15 @@ function AddTopicModal({ onAdd, onClose }) {
 
       onAdd(resolvedName, questions);
       onClose();
-    } catch {
+    } catch (err) {
+      if (err?.message === 'INVALID_JSON') {
+        setError(t('addTopicInvalidJson'));
+        return;
+      }
+      if (err?.message === 'INVALID_FORMAT') {
+        setError(t('addTopicInvalidStructure'));
+        return;
+      }
       setError(t('addTopicFormatError'));
     }
   };
