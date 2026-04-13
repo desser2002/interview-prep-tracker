@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { Plus, AlertCircle } from 'lucide-react';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { useLanguage } from './hooks/useLanguage';
 import ImportScreen from './components/ImportScreen';
 import Header from './components/Header';
 import TopicCard from './components/TopicCard';
@@ -79,10 +81,241 @@ function exportAllChecklists(checklists) {
   URL.revokeObjectURL(url);
 }
 
+function parseQuestionsInput(rawInput) {
+  const trimmed = rawInput.trim();
+  if (!trimmed) {
+    return { questions: [], parsedTopicName: null };
+  }
+
+  const looksLikeJson = trimmed.startsWith('{') || trimmed.startsWith('[');
+  if (!looksLikeJson) {
+    const questions = trimmed
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    return { questions, parsedTopicName: null };
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(trimmed);
+  } catch {
+    throw new Error('INVALID_JSON');
+  }
+  const rawQuestions = Array.isArray(parsed) ? parsed : parsed?.questions;
+  const hasNameField = !Array.isArray(parsed) && typeof parsed?.name === 'string';
+  const parsedTopicName = hasNameField ? parsed.name.trim() : null;
+
+  if (!Array.isArray(rawQuestions)) {
+    throw new Error('INVALID_FORMAT');
+  }
+
+  const questions = rawQuestions
+    .map((item) => {
+      if (typeof item === 'string') return item.trim();
+      if (item && typeof item === 'object' && typeof item.text === 'string') return item.text.trim();
+      return '';
+    })
+    .filter(Boolean);
+
+  return { questions, parsedTopicName };
+}
+
+function AddTopicModal({ onAdd, onClose }) {
+  const { t } = useLanguage();
+  const [topicName, setTopicName] = useState('');
+  const [questionsInput, setQuestionsInput] = useState('');
+  const [error, setError] = useState(null);
+
+  const handleSubmit = () => {
+    const nameFromInput = topicName.trim();
+    if (!questionsInput.trim()) {
+      setError(t('addTopicQuestionsRequired'));
+      return;
+    }
+
+    try {
+      const { questions, parsedTopicName } = parseQuestionsInput(questionsInput);
+      const resolvedName = nameFromInput || parsedTopicName || '';
+
+      if (!resolvedName) {
+        setError(t('addTopicNameRequired'));
+        return;
+      }
+      if (questions.length === 0) {
+        setError(t('addTopicQuestionsRequired'));
+        return;
+      }
+
+      onAdd(resolvedName, questions);
+      onClose();
+    } catch (err) {
+      if (err?.message === 'INVALID_JSON') {
+        setError(t('addTopicInvalidJson'));
+        return;
+      }
+      if (err?.message === 'INVALID_FORMAT') {
+        setError(t('addTopicInvalidStructure'));
+        return;
+      }
+      setError(t('addTopicFormatError'));
+    }
+  };
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 50,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(0,0,0,0.3)',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)',
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        style={{
+          background: '#fff',
+          borderRadius: 20,
+          padding: 24,
+          width: '100%',
+          maxWidth: 460,
+          margin: '0 16px',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+          border: '1px solid rgba(0,0,0,0.08)',
+        }}
+      >
+        <h2 style={{ fontSize: 17, fontWeight: 600, color: '#1d1d1f', margin: '0 0 14px' }}>
+          {t('addTopicTitle')}
+        </h2>
+
+        <label
+          htmlFor="topic-name-input"
+          style={{ display: 'block', fontSize: 13, color: '#6e6e73', marginBottom: 6 }}
+        >
+          {t('topicNameField')}
+        </label>
+        <input
+          id="topic-name-input"
+          type="text"
+          value={topicName}
+          onChange={(e) => setTopicName(e.target.value)}
+          placeholder={t('topicNamePlaceholder')}
+          style={{
+            width: '100%',
+            padding: '12px 14px',
+            borderRadius: 12,
+            border: '1px solid rgba(0,0,0,0.12)',
+            background: '#fff',
+            fontSize: 14,
+            color: '#1d1d1f',
+            outline: 'none',
+            boxSizing: 'border-box',
+            marginBottom: 12,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+          }}
+        />
+
+        <label
+          htmlFor="questions-input"
+          style={{ display: 'block', fontSize: 13, color: '#6e6e73', marginBottom: 6 }}
+        >
+          {t('questionsInputField')}
+        </label>
+        <textarea
+          id="questions-input"
+          value={questionsInput}
+          onChange={(e) => setQuestionsInput(e.target.value)}
+          placeholder={t('questionsInputPlaceholder')}
+          rows={8}
+          style={{
+            width: '100%',
+            padding: '12px 14px',
+            borderRadius: 12,
+            border: '1px solid rgba(0,0,0,0.12)',
+            background: '#fff',
+            fontSize: 14,
+            color: '#1d1d1f',
+            outline: 'none',
+            boxSizing: 'border-box',
+            resize: 'vertical',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+          }}
+        />
+
+        <p style={{ fontSize: 12, color: '#6e6e73', margin: '12px 0 0', whiteSpace: 'pre-line' }}>
+          {t('addTopicFormatHint')}
+        </p>
+
+        {error && (
+          <div
+            style={{
+              marginTop: 12,
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 8,
+              background: '#fff0f0',
+              border: '1px solid #ffd0d0',
+              borderRadius: 10,
+              padding: '10px 14px',
+            }}
+          >
+            <AlertCircle style={{ width: 15, height: 15, color: '#ff3b30', flexShrink: 0, marginTop: 1 }} />
+            <p style={{ fontSize: 12, color: '#c0392b', margin: 0 }}>{error}</p>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+          <button
+            onClick={onClose}
+            style={{
+              flex: 1,
+              padding: '10px 14px',
+              borderRadius: 999,
+              border: '1px solid rgba(0,0,0,0.1)',
+              background: 'transparent',
+              fontSize: 14,
+              fontWeight: 500,
+              color: '#6e6e73',
+              cursor: 'pointer',
+            }}
+          >
+            {t('cancel')}
+          </button>
+          <button
+            onClick={handleSubmit}
+            style={{
+              flex: 1,
+              padding: '10px 14px',
+              borderRadius: 999,
+              border: 'none',
+              background: '#0071e3',
+              fontSize: 14,
+              fontWeight: 500,
+              color: '#fff',
+              cursor: 'pointer',
+            }}
+          >
+            {t('addTopicButton')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
+  const { t } = useLanguage();
   const [checklists, setChecklists] = useLocalStorage('checklists', migrateOrEmpty);
   const [activeId, setActiveId] = useLocalStorage('active_checklist_id', null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showAddTopicModal, setShowAddTopicModal] = useState(false);
 
   const activeChecklist =
     checklists.find((c) => c.id === activeId) ?? checklists[0] ?? null;
@@ -151,11 +384,28 @@ export default function App() {
     );
   };
 
+  const handleAddTopic = (name, questions) => {
+    if (!activeChecklist) return;
+
+    const topicToAdd = {
+      name,
+      questions: questions.map(normalizeQuestion),
+    };
+
+    setChecklists(
+      checklists.map((c) => (
+        c.id === activeChecklist.id
+          ? { ...c, topics: [...c.topics, topicToAdd] }
+          : c
+      ))
+    );
+  };
+
   const handlePostponeReview = (statuses, days) => {
     if (!activeChecklist || !Array.isArray(statuses) || statuses.length === 0 || days <= 0) return;
 
-    const today = new Date();
-    today.setHours(23, 59, 59, 999);
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
     const now = new Date().toISOString();
 
     setChecklists(
@@ -168,7 +418,7 @@ export default function App() {
             questions: topic.questions.map((q) => {
               if (q.status === 'none' || !q.next_review || !statuses.includes(q.status)) return q;
               const nextReviewDate = new Date(q.next_review);
-              if (nextReviewDate > today) return q;
+              if (nextReviewDate > endOfToday) return q;
 
               const postponedDate = new Date(nextReviewDate);
               postponedDate.setDate(postponedDate.getDate() + days);
@@ -224,8 +474,32 @@ export default function App() {
               onStatusChange={handleStatusChange}
             />
           ))}
+          <div className="pt-1 flex justify-center">
+            <button
+              onClick={() => setShowAddTopicModal(true)}
+              className="
+                px-5 py-2.5 rounded-full
+                bg-white hover:bg-[#fafafa]
+                text-[#0071e3] font-medium text-sm
+                transition-all duration-200 ease-in-out
+                border border-[rgba(0,113,227,0.25)]
+                flex items-center justify-center gap-2
+                focus:outline-none focus:ring-2 focus:ring-[#0071e3] focus:ring-offset-1
+              "
+              style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}
+            >
+              <Plus className="w-4 h-4" />
+              {t('addTopicButton')}
+            </button>
+          </div>
         </main>
       </div>
+      {showAddTopicModal && (
+        <AddTopicModal
+          onAdd={handleAddTopic}
+          onClose={() => setShowAddTopicModal(false)}
+        />
+      )}
     </div>
   );
 }
