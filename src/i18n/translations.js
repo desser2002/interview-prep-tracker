@@ -57,6 +57,9 @@ export const translations = {
 
     // Review panel
     reviewToday: 'Повторить сегодня',
+    reviewPostponeForStatuses: 'Для статусов',
+    reviewPostponeByDays: 'дней',
+    reviewPostponeButton: 'Перенести',
 
     // Question row
     reviewLabel: (date) => `Повторить: ${date}`,
@@ -122,6 +125,9 @@ export const translations = {
 
     // Review panel
     reviewToday: 'Review Today',
+    reviewPostponeForStatuses: 'For statuses',
+    reviewPostponeByDays: 'days',
+    reviewPostponeButton: 'Postpone',
 
     // Question row
     reviewLabel: (date) => `Review: ${date}`,
