@@ -46,8 +46,8 @@ export default function ReviewPanel({ topics, onStatusChange, onPostponeReview, 
 
   const handlePostpone = () => {
     const selected = REVIEW_STATUSES.filter((status) => selectedStatuses[status]);
-    const parsedDays = Number.parseInt(days, 10);
-    if (selected.length === 0 || Number.isNaN(parsedDays) || parsedDays <= 0) return;
+    const parsedDays = Number(days);
+    if (selected.length === 0 || !Number.isInteger(parsedDays) || parsedDays <= 0) return;
     onPostponeReview(selected, parsedDays);
   };
 
@@ -108,6 +108,7 @@ export default function ReviewPanel({ topics, onStatusChange, onPostponeReview, 
           <input
             type="number"
             min="1"
+            step="1"
             value={days}
             onChange={(e) => setDays(e.target.value)}
             className="w-16 px-2 py-1 text-xs rounded-md border border-[#d2d2d7] focus:outline-none focus:ring-2 focus:ring-[#007aff33]"
