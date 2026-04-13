@@ -404,8 +404,8 @@ export default function App() {
   const handlePostponeReview = (statuses, days) => {
     if (!activeChecklist || !Array.isArray(statuses) || statuses.length === 0 || days <= 0) return;
 
-    const today = new Date();
-    today.setHours(23, 59, 59, 999);
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
     const now = new Date().toISOString();
 
     setChecklists(
@@ -418,7 +418,7 @@ export default function App() {
             questions: topic.questions.map((q) => {
               if (q.status === 'none' || !q.next_review || !statuses.includes(q.status)) return q;
               const nextReviewDate = new Date(q.next_review);
-              if (nextReviewDate > today) return q;
+              if (nextReviewDate > endOfToday) return q;
 
               const postponedDate = new Date(nextReviewDate);
               postponedDate.setDate(postponedDate.getDate() + days);
