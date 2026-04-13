@@ -96,11 +96,15 @@ function parseQuestionsInput(rawInput) {
     return { questions, parsedTopicName: null };
   }
 
-  const parsed = JSON.parse(trimmed);
+  let parsed;
+  try {
+    parsed = JSON.parse(trimmed);
+  } catch {
+    throw new Error('INVALID_JSON');
+  }
   const sourceQuestions = Array.isArray(parsed) ? parsed : parsed?.questions;
-  const parsedTopicName = !Array.isArray(parsed) && typeof parsed?.name === 'string'
-    ? parsed.name.trim()
-    : null;
+  const hasNameField = !Array.isArray(parsed) && typeof parsed?.name === 'string';
+  const parsedTopicName = hasNameField ? parsed.name.trim() : null;
 
   if (!Array.isArray(sourceQuestions)) {
     throw new Error('INVALID_FORMAT');
@@ -163,7 +167,9 @@ function AddTopicModal({ onAdd, onClose }) {
         backdropFilter: 'blur(4px)',
         WebkitBackdropFilter: 'blur(4px)',
       }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div
         style={{
