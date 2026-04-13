@@ -167,7 +167,7 @@ function AddTopicModal({ onAdd, onClose }) {
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 60,
+        zIndex: 50,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -185,12 +185,13 @@ function AddTopicModal({ onAdd, onClose }) {
           borderRadius: 20,
           padding: 24,
           width: '100%',
-          maxWidth: 560,
+          maxWidth: 460,
           margin: '0 16px',
           boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+          border: '1px solid rgba(0,0,0,0.08)',
         }}
       >
-        <h2 style={{ fontSize: 18, fontWeight: 600, color: '#1d1d1f', margin: '0 0 14px' }}>
+        <h2 style={{ fontSize: 17, fontWeight: 600, color: '#1d1d1f', margin: '0 0 14px' }}>
           {t('addTopicTitle')}
         </h2>
 
@@ -208,15 +209,16 @@ function AddTopicModal({ onAdd, onClose }) {
           placeholder={t('topicNamePlaceholder')}
           style={{
             width: '100%',
-            padding: '11px 14px',
-            borderRadius: 10,
+            padding: '12px 14px',
+            borderRadius: 12,
             border: '1px solid rgba(0,0,0,0.12)',
-            background: '#f5f5f7',
+            background: '#fff',
             fontSize: 14,
             color: '#1d1d1f',
             outline: 'none',
             boxSizing: 'border-box',
             marginBottom: 12,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
           }}
         />
 
@@ -234,19 +236,20 @@ function AddTopicModal({ onAdd, onClose }) {
           rows={8}
           style={{
             width: '100%',
-            padding: '11px 14px',
-            borderRadius: 10,
+            padding: '12px 14px',
+            borderRadius: 12,
             border: '1px solid rgba(0,0,0,0.12)',
-            background: '#f5f5f7',
+            background: '#fff',
             fontSize: 14,
             color: '#1d1d1f',
             outline: 'none',
             boxSizing: 'border-box',
             resize: 'vertical',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
           }}
         />
 
-        <p style={{ fontSize: 12, color: '#6e6e73', margin: '10px 0 0', whiteSpace: 'pre-line' }}>
+        <p style={{ fontSize: 12, color: '#6e6e73', margin: '12px 0 0', whiteSpace: 'pre-line' }}>
           {t('addTopicFormatHint')}
         </p>
 
@@ -273,8 +276,8 @@ function AddTopicModal({ onAdd, onClose }) {
             onClick={onClose}
             style={{
               flex: 1,
-              padding: '10px',
-              borderRadius: 10,
+              padding: '10px 14px',
+              borderRadius: 999,
               border: '1px solid rgba(0,0,0,0.1)',
               background: 'transparent',
               fontSize: 14,
@@ -289,8 +292,8 @@ function AddTopicModal({ onAdd, onClose }) {
             onClick={handleSubmit}
             style={{
               flex: 1,
-              padding: '10px',
-              borderRadius: 10,
+              padding: '10px 14px',
+              borderRadius: 999,
               border: 'none',
               background: '#0071e3',
               fontSize: 14,
@@ -432,21 +435,24 @@ export default function App() {
               onStatusChange={handleStatusChange}
             />
           ))}
-          <button
-            onClick={() => setShowAddTopicModal(true)}
-            className="
-              w-full py-3 rounded-2xl
-              bg-white hover:bg-[#fafafa]
-              text-[#0071e3] font-semibold text-sm
-              transition-all duration-200
-              border border-[rgba(0,113,227,0.22)]
-              flex items-center justify-center gap-2
-            "
-            style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
-          >
-            <Plus className="w-4 h-4" />
-            {t('addTopicButton')}
-          </button>
+          <div className="pt-1 flex justify-center">
+            <button
+              onClick={() => setShowAddTopicModal(true)}
+              className="
+                px-5 py-2.5 rounded-full
+                bg-white hover:bg-[#fafafa]
+                text-[#0071e3] font-medium text-sm
+                transition-all duration-200 ease-in-out
+                border border-[rgba(0,113,227,0.25)]
+                flex items-center justify-center gap-2
+                focus:outline-none focus:ring-2 focus:ring-[#0071e3] focus:ring-offset-1
+              "
+              style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}
+            >
+              <Plus className="w-4 h-4" />
+              {t('addTopicButton')}
+            </button>
+          </div>
         </main>
       </div>
       {showAddTopicModal && (
