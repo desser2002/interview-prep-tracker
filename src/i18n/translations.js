@@ -64,6 +64,17 @@ export const translations = {
 
     // Topic card
     questionCount: (n) => `${n} ${ruPlural(n, 'вопрос', 'вопроса', 'вопросов')}`,
+    addTopicButton: 'Добавить тему',
+    addTopicTitle: 'Добавить новую тему',
+    topicNameField: 'Название темы',
+    topicNamePlaceholder: 'Например: Базы данных',
+    questionsInputField: 'Список вопросов',
+    questionsInputPlaceholder: 'Вставьте JSON или список вопросов (по одному в строке)',
+    addTopicNameRequired: 'Укажите название темы или передайте поле "name" в JSON.',
+    addTopicQuestionsRequired: 'Добавьте хотя бы один вопрос.',
+    addTopicFormatError: 'Неверный формат. Используйте JSON или список вопросов по строкам.',
+    addTopicFormatHint:
+      'Формат 1 (JSON): {"name":"OOP","questions":["Что такое полиморфизм?","SOLID принципы"]}\nФормат 2 (списком):\nЧто такое полиморфизм?\nSOLID принципы',
 
     // Status dots
     statusNone: 'Не отмечено',
@@ -129,6 +140,17 @@ export const translations = {
 
     // Topic card
     questionCount: (n) => `${n} question${n === 1 ? '' : 's'}`,
+    addTopicButton: 'Add Topic',
+    addTopicTitle: 'Add New Topic',
+    topicNameField: 'Topic Name',
+    topicNamePlaceholder: 'Example: Databases',
+    questionsInputField: 'Questions List',
+    questionsInputPlaceholder: 'Paste JSON or one question per line',
+    addTopicNameRequired: 'Provide a topic name or include the "name" field in JSON.',
+    addTopicQuestionsRequired: 'Add at least one question.',
+    addTopicFormatError: 'Invalid format. Use JSON or one question per line.',
+    addTopicFormatHint:
+      'Format 1 (JSON): {"name":"OOP","questions":["What is polymorphism?","SOLID principles"]}\nFormat 2 (plain list):\nWhat is polymorphism?\nSOLID principles',
 
     // Status dots
     statusNone: 'Not marked',

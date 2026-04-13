@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { Plus, AlertCircle } from 'lucide-react';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { useLanguage } from './hooks/useLanguage';
 import ImportScreen from './components/ImportScreen';
 import Header from './components/Header';
 import TopicCard from './components/TopicCard';
@@ -79,10 +81,224 @@ function exportAllChecklists(checklists) {
   URL.revokeObjectURL(url);
 }
 
+function parseQuestionsInput(rawInput) {
+  const trimmed = rawInput.trim();
+  if (!trimmed) {
+    return { questions: [], parsedTopicName: null };
+  }
+
+  const startsLikeJson = trimmed.startsWith('{') || trimmed.startsWith('[');
+  if (!startsLikeJson) {
+    const questions = trimmed
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    return { questions, parsedTopicName: null };
+  }
+
+  const parsed = JSON.parse(trimmed);
+  const sourceQuestions = Array.isArray(parsed) ? parsed : parsed?.questions;
+  const parsedTopicName = !Array.isArray(parsed) && typeof parsed?.name === 'string'
+    ? parsed.name.trim()
+    : null;
+
+  if (!Array.isArray(sourceQuestions)) {
+    throw new Error('INVALID_FORMAT');
+  }
+
+  const questions = sourceQuestions
+    .map((item) => {
+      if (typeof item === 'string') return item.trim();
+      if (item && typeof item === 'object' && typeof item.text === 'string') return item.text.trim();
+      return '';
+    })
+    .filter(Boolean);
+
+  return { questions, parsedTopicName };
+}
+
+function AddTopicModal({ onAdd, onClose }) {
+  const { t } = useLanguage();
+  const [topicName, setTopicName] = useState('');
+  const [questionsInput, setQuestionsInput] = useState('');
+  const [error, setError] = useState(null);
+
+  const handleSubmit = () => {
+    const nameFromInput = topicName.trim();
+    if (!questionsInput.trim()) {
+      setError(t('addTopicQuestionsRequired'));
+      return;
+    }
+
+    try {
+      const { questions, parsedTopicName } = parseQuestionsInput(questionsInput);
+      const resolvedName = nameFromInput || parsedTopicName || '';
+
+      if (!resolvedName) {
+        setError(t('addTopicNameRequired'));
+        return;
+      }
+      if (questions.length === 0) {
+        setError(t('addTopicQuestionsRequired'));
+        return;
+      }
+
+      onAdd(resolvedName, questions);
+      onClose();
+    } catch {
+      setError(t('addTopicFormatError'));
+    }
+  };
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 60,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(0,0,0,0.3)',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)',
+      }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div
+        style={{
+          background: '#fff',
+          borderRadius: 20,
+          padding: 24,
+          width: '100%',
+          maxWidth: 560,
+          margin: '0 16px',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+        }}
+      >
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: '#1d1d1f', margin: '0 0 14px' }}>
+          {t('addTopicTitle')}
+        </h2>
+
+        <label
+          htmlFor="topic-name-input"
+          style={{ display: 'block', fontSize: 13, color: '#6e6e73', marginBottom: 6 }}
+        >
+          {t('topicNameField')}
+        </label>
+        <input
+          id="topic-name-input"
+          type="text"
+          value={topicName}
+          onChange={(e) => setTopicName(e.target.value)}
+          placeholder={t('topicNamePlaceholder')}
+          style={{
+            width: '100%',
+            padding: '11px 14px',
+            borderRadius: 10,
+            border: '1px solid rgba(0,0,0,0.12)',
+            background: '#f5f5f7',
+            fontSize: 14,
+            color: '#1d1d1f',
+            outline: 'none',
+            boxSizing: 'border-box',
+            marginBottom: 12,
+          }}
+        />
+
+        <label
+          htmlFor="questions-input"
+          style={{ display: 'block', fontSize: 13, color: '#6e6e73', marginBottom: 6 }}
+        >
+          {t('questionsInputField')}
+        </label>
+        <textarea
+          id="questions-input"
+          value={questionsInput}
+          onChange={(e) => setQuestionsInput(e.target.value)}
+          placeholder={t('questionsInputPlaceholder')}
+          rows={8}
+          style={{
+            width: '100%',
+            padding: '11px 14px',
+            borderRadius: 10,
+            border: '1px solid rgba(0,0,0,0.12)',
+            background: '#f5f5f7',
+            fontSize: 14,
+            color: '#1d1d1f',
+            outline: 'none',
+            boxSizing: 'border-box',
+            resize: 'vertical',
+          }}
+        />
+
+        <p style={{ fontSize: 12, color: '#6e6e73', margin: '10px 0 0', whiteSpace: 'pre-line' }}>
+          {t('addTopicFormatHint')}
+        </p>
+
+        {error && (
+          <div
+            style={{
+              marginTop: 12,
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 8,
+              background: '#fff0f0',
+              border: '1px solid #ffd0d0',
+              borderRadius: 10,
+              padding: '10px 14px',
+            }}
+          >
+            <AlertCircle style={{ width: 15, height: 15, color: '#ff3b30', flexShrink: 0, marginTop: 1 }} />
+            <p style={{ fontSize: 12, color: '#c0392b', margin: 0 }}>{error}</p>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+          <button
+            onClick={onClose}
+            style={{
+              flex: 1,
+              padding: '10px',
+              borderRadius: 10,
+              border: '1px solid rgba(0,0,0,0.1)',
+              background: 'transparent',
+              fontSize: 14,
+              fontWeight: 500,
+              color: '#6e6e73',
+              cursor: 'pointer',
+            }}
+          >
+            {t('cancel')}
+          </button>
+          <button
+            onClick={handleSubmit}
+            style={{
+              flex: 1,
+              padding: '10px',
+              borderRadius: 10,
+              border: 'none',
+              background: '#0071e3',
+              fontSize: 14,
+              fontWeight: 500,
+              color: '#fff',
+              cursor: 'pointer',
+            }}
+          >
+            {t('addTopicButton')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
+  const { t } = useLanguage();
   const [checklists, setChecklists] = useLocalStorage('checklists', migrateOrEmpty);
   const [activeId, setActiveId] = useLocalStorage('active_checklist_id', null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showAddTopicModal, setShowAddTopicModal] = useState(false);
 
   const activeChecklist =
     checklists.find((c) => c.id === activeId) ?? checklists[0] ?? null;
@@ -151,6 +367,23 @@ export default function App() {
     );
   };
 
+  const handleAddTopic = (name, questions) => {
+    if (!activeChecklist) return;
+
+    const topicToAdd = {
+      name,
+      questions: questions.map(normalizeQuestion),
+    };
+
+    setChecklists(
+      checklists.map((c) => (
+        c.id === activeChecklist.id
+          ? { ...c, topics: [...c.topics, topicToAdd] }
+          : c
+      ))
+    );
+  };
+
   if (checklists.length === 0) {
     return <ImportScreen onImport={handleAddChecklist} />;
   }
@@ -185,8 +418,29 @@ export default function App() {
               onStatusChange={handleStatusChange}
             />
           ))}
+          <button
+            onClick={() => setShowAddTopicModal(true)}
+            className="
+              w-full py-3 rounded-2xl
+              bg-white hover:bg-[#fafafa]
+              text-[#0071e3] font-semibold text-sm
+              transition-all duration-200
+              border border-[rgba(0,113,227,0.22)]
+              flex items-center justify-center gap-2
+            "
+            style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+          >
+            <Plus className="w-4 h-4" />
+            {t('addTopicButton')}
+          </button>
         </main>
       </div>
+      {showAddTopicModal && (
+        <AddTopicModal
+          onAdd={handleAddTopic}
+          onClose={() => setShowAddTopicModal(false)}
+        />
+      )}
     </div>
   );
 }
